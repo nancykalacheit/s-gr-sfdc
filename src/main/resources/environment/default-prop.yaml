@@ -1,0 +1,6 @@
+# Default properties (non environment-specific)
+application:
+    name: s-gr-sfdc
+    instance: ${domain}
+    version: ${pom.version}
+    majorVersion: ${pom.application.majorVersion}
