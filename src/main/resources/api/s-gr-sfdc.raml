@@ -1,0 +1,43 @@
+#%RAML 1.0
+
+resourceTypes:
+  resourceType:
+    is:
+      - client-id-secret-required
+    type:
+      rt.read-write-resource-type:
+        getResponseExamples:
+          Response example 1: !include examples/crm/Account/Bulk-Accounts.raml
+        getResponseType: dtaccount.accounts
+        postRequestExamples:
+          Request example 1: !include examples/crm/Account/Bulk-Accounts.raml
+        postRequestType: dtaccount.accounts
+        postResponseExamples:
+          Response example 1: !include examples/crm/Account/Bulk-Accounts.raml
+        postResponseType: dtaccount.accounts
+title: s-gr-sfdc
+version: v1
+
+uses:
+  rt: library/resource-types.raml
+  dtaccount: data-types/crm/Account-data-type.raml
+
+traits:
+  client-id-secret-required: !include /exchange_modules/4ee67a21-421f-4c2f-ad1d-5abd11c095a9/client-id-enforcement/1.0.0/client-id-enforcement.raml
+  
+
+/upsertRecords:
+          type: resourceType
+
+/getRecord:
+  is: [client-id-secret-required]
+  type:
+    rt.read-only-resource-type:
+        getResponseExamples:
+          Response example 1: !include examples/crm/Account/Single-Account.raml
+        getResponseType: dtaccount.SingleAccount
+        
+/api-status:
+  is: [client-id-secret-required] 
+  type: 
+    rt.api-status-resource-type
