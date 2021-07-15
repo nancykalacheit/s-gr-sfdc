@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<apikit:config outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" doc:name="Router" doc:id="8919f3d1-55d8-4bb4-8af4-d4302217c0b4" name="s-gr-sfdc-config" api="s-gr-sfdc.raml" disableValidations="true"/>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="aa5f1fde-2f0e-453f-935b-a65158a3f4da" >
+		<salesforce:basic-connection username="${config.salesforce.username}" password="${config.salesforce.password}" securityToken="${config.salesforce.securityToken}" url="${config.salesforce.authorizationURL}" />
+	</salesforce:sfdc-config>
+	<import doc:name="Import" doc:id="f7b5646c-2a97-4755-8249-2b1ca0e9171c" file="common/audit/audit.xml" />
+	<import doc:name="Import" doc:id="94ebe02e-b576-4165-bb19-e1dcf900c3e8" file="common/audit/commons.xml" />
+	<import doc:name="Import" doc:id="70b82caa-76e3-4d4b-a860-28b90709b7dd" file="common/error/error-handling.xml" />
+	<import doc:name="Import" doc:id="c150dd62-90d7-4579-a364-12b112157562" file="common/error/global-api-error.xml" />
+	<import doc:name="Import" doc:id="22838dae-af39-40ed-8954-022a103bd2b4" file="common/error/global-error.xml" />
+	<global-property doc:name="Global Property" doc:id="96f71df1-6c02-4c6f-8889-5394cdf44964" name="mule.env" value="devLocal" />
+	<configuration-properties doc:name="Configuration properties" doc:id="c0bc5f27-1daf-482d-bac4-ccf6e7e19f50" file="environment/${mule.env}.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="67ef6ff4-9ce8-4759-8976-11790618828d" file="environment\default-prop.yaml" />
+	<secure-properties:config name="s-gr-sfdc-encryption" doc:name="Secure Properties Config" doc:id="25fc3f0d-84d2-4a10-a8ca-28dba5809b25" file="secure/${mule.securefile}.yaml" key="ecnPassword" >
+		<secure-properties:encrypt algorithm="Blowfish" mode="ECB" />
+	</secure-properties:config>
+	<global-property doc:name="Global Property" doc:id="cdd3de7b-48e3-4ca5-8ff5-3d93e3fe9a27" name="mule.securefile" value="dev-secure" />
+	<configuration-properties doc:name="Configuration properties" doc:id="cf24d041-7943-4a64-9d19-42d17eb3079f" file="secure/${mule.securefile}.yaml" />
+	<configuration doc:name="Configuration" doc:id="8454a255-30ab-4dfc-a2eb-95e15ee21e0c" defaultErrorHandler-ref="api-global-error-handler" />
+	<http:listener-config
+		name="httpListenerConfigSystem">
+		<http:listener-connection host="0.0.0.0"
+			port="${http.port}" connectionIdleTimeout="${http.timeout}" />
+	</http:listener-config>
+</mule>

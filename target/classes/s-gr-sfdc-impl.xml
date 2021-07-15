@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="post:\upsertRecords:application\json:s-gr-sfdc-config" doc:id="df21a701-63ae-40b4-a1f2-991f2b6caede" >
+		<ee:transform doc:name="Set Log Configuration" doc:id="a45ed48a-e348-409b-a30c-e44dbf439f03" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="logMessage" ><![CDATA[%dw 2.0
+output application/java
+---
+'System sfdc - Upsert accounts - Start']]></ee:set-variable>
+				<ee:set-variable variableName="logCategory" ><![CDATA[%dw 2.0
+output application/java
+---
+'Trace']]></ee:set-variable>
+				<ee:set-variable variableName="logLevel" ><![CDATA[%dw 2.0
+output application/java
+---
+'INFO']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mule-common-logger-subflow" doc:id="4c1ee21b-501b-4735-adfc-d9f6a530db2c" name="mule-common-logger-subflow" />
+		<choice doc:name="Choice" doc:id="2c03de84-15ca-4592-89ab-693daaa3ca17" >
+			<when expression='#[attributes.queryParams.objectSfdc == "Account" and attributes.queryParams.typeData == "RCU"]' >
+				<ee:transform doc:name="Account RCU mapping To Java" doc:id="b94166a3-6055-42dd-9cb4-4292ebd54f2a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map (item,index) ->{
+	"RecordTypeId": item.RecordTypeId,
+	("NAdherent__c" : item.NAdherent__c) if(!isEmpty(item.NAdherent__c)),
+	("Id": item.Id) if(!isEmpty(item.Id)),
+	("FirstName" : item.FirstName) if(!isEmpty(item.FirstName)),
+	("LastName" : item.LastName) if(!isEmpty(item.LastName)),
+	("Salutation" : item.Salutation) if(!isEmpty(item.Salutation)),
+	("NomDeNaissance__c": item.NomDeNaissance__c) if(!isEmpty(item.NomDeNaissance__c)),
+	("PersonBirthdate" : item.PersonBirthdate as Date {format: "yyyy-MM-dd"}) if(!isEmpty(item.PersonBirthdate)),
+	("SituationMatrimoniale__c" : item.SituationMatrimoniale__c) if(!isEmpty(item.SituationMatrimoniale__c)),
+	("NombreDEnfantsACharge__c" : item.NombreDEnfantsACharge__c) if(!isEmpty(item.NombreDEnfantsACharge__c)),
+	//("TypeDeCompte__c" : item.TypeDeCompte__c) if (!isEmpty(item.TypeDeCompte__c)),
+	"TypeDeCompte__c" : 'Client',
+	("PersonHomePhone" : item.PersonHomePhone) if (!isEmpty(item.PersonHomePhone)),
+	("PersonOtherPhone" : item.PersonOtherPhone) if (!isEmpty(item.PersonOtherPhone)),
+	("PersonMobilePhone" : item.PersonMobilePhone) if (!isEmpty(item.PersonMobilePhone)),
+	("DateDeDeces__c" : item.DateDeDeces__c as Date {format: "yyyy-MM-dd"}) if (!isEmpty(item.DateDeDeces__c)),
+	("CSP__c" : item.CSP__c) if (!isEmpty(item.CSP__c)),
+	("Industry" : item.Industry) if (!isEmpty(item.Industry)),
+	("Profession__c" : item.Profession__c) if (!isEmpty(item.Profession__c)),
+	("PersonEmail" : item.PersonEmail) if (!isEmpty(item.PersonEmail)),
+	("RaisonSociale1__c" : item.RaisonSociale1__c) if (!isEmpty(item.RaisonSociale1__c)),
+	("BatimentResidenceAdresse1__c" : item.BatimentResidenceAdresse1__c) if (!isEmpty(item.BatimentResidenceAdresse1__c)),
+	("BPLieuDitAdresse1__c" : item.BPLieuDitAdresse1__c) if (!isEmpty(item.BPLieuDitAdresse1__c)),
+	("BatimentResidenceAdresse2__c" : item.BatimentResidenceAdresse2__c) if (!isEmpty(item.BatimentResidenceAdresse2__c)),
+	("RaisonSociale2__c" : item.RaisonSociale2__c) if (!isEmpty(item.RaisonSociale2__c)),
+	("BPLieuDitAdresse2__c" : item.BPLieuDitAdresse2__c),
+	("NPAIAdresse1__pc" : item.NPAIAdresse1__pc as Boolean) if(!isEmpty(item.NPAIAdresse1__pc)),
+	("NPAIAdresse2__c" : item.NPAIAdresse2__c as Boolean) if(!isEmpty(item.NPAIAdresse1__pc)),
+	("BillingCountry": item.BillingCountry) if (!isEmpty(item.BillingCountry)),
+	("BillingCity": item.BillingCity) if (!isEmpty(item.BillingCity)),
+	("BillingStreet": item.BillingStreet) if (!isEmpty(item.BillingStreet)),
+	("BillingPostalCode": item.BillingPostalCode) if (!isEmpty(item.BillingPostalCode)),
+	("ShippingCountry": item.ShippingCountry) if (!isEmpty(item.ShippingCountry)),
+	("ShippingCity": item.ShippingCity) if (!isEmpty(item.ShippingCity)),
+	("ShippingStreet": item.ShippingStreet) if (!isEmpty(item.ShippingStreet)),
+	("ShippingPostalCode": item.ShippingPostalCode) if (!isEmpty(item.ShippingPostalCode)),
+	("CodeParrain__c": item.CodeParrain__c) if(!isEmpty(item.CodeParrain__c)),
+	"PrCommercialesInfosServicesProduits__pc" : item.PrCommercialesInfosServicesProduits__pc,
+	"Newsletter__pc" : item.Newsletter__pc,
+	"EnqueteClient__pc" : item.EnqueteClient__pc,
+	"EnvoiDeContenusAdaptes__pc" : item.EnvoiDeContenusAdaptes__pc,
+	("DateDuDernierConsentement__pc": item.DateDuDernierConsentement__pc as Date {format: "yyyy-MM-dd"}) if(!isEmpty(item.Id)),
+	"DerniereSourceDeConsentement__pc": item.DerniereSourceDeConsentement__pc
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[attributes.queryParams.objectSfdc == "Contract"]' >
+				<ee:transform doc:name="Contract mapping to Java" doc:id="253d6f6c-4690-45ef-9e00-7aaa09a809ba" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+
+payload map (item,index) ->{
+	//"IdRCU__c": item.idRcu,
+	"NContrat__c": item.NContrat__c,
+	"Account":  item.Account,
+	("Produit__c": item.Produit__c) if(!isEmpty(item.Produit__c)),
+	("Gamme_produit__c": item.Gamme_produit__c) if(!isEmpty(item.Gamme_produit__c)),
+	("GarantiesSouscrites__c": item.GarantiesSouscrites__c) if(!isEmpty(item.GarantiesSouscrites__c)),
+	("Source__c": item.Source__c)  if(!isEmpty(item.Source__c)),
+	("Status": item.Status) if(!isEmpty(item.Status)),
+	//"StartDate": item.dateDeDebut as Date {format: "yyyy-MM-dd"},
+	("DateDeffet__c": item.DateDeffet__c as Date {format: "yyyy-MM-dd"}) if(!isEmpty(item.DateDeffet__c)),
+	("DateDeFinDuContrat__c": item.DateDeFinDuContrat__c as Date {format: "yyyy-MM-dd"}) if(!isEmpty(item.DateDeFinDuContrat__c))
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[attributes.queryParams.objectSfdc == "Task"]' >
+				<ee:transform doc:name="Task mapping to Java" doc:id="bcad1ec2-d764-4047-a602-ed816244829e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map (item, index) -> {
+	"DateDeNumerisation__c" : item.DateDeNumerisation__c as Date {format: "yyyy-MM-dd"},
+	//("What": item.What) if(!isEmpty(item.What)),
+//	"WhatId": {
+//	 "Type": "Account",
+//	 "NAdherent__c": item.'NUM ADHERENT'
+//	 },
+	"zzz_NAdherent__c": item.zzz_NAdherent__c,
+	"NumeroDuDocument__c": item.NumeroDuDocument__c,
+	"Montant__c ": item.Montant__c,
+	"TypologieDeDocument__c": item.TypologieDeDocument__c,
+	"IdGed__c": item.IdGed__c 
+	//"Status" : item.status
+} ]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[attributes.queryParams.objectSfdc == "Case"]' >
+				<ee:transform doc:name="Case mapping to Java" doc:id="b504f6a7-0acf-4ec9-befe-a2df71c54ab0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map (item, index) -> {
+	"IDGED__c": item.IDGED__c,
+	("Account": item.Account) if(!isEmpty(item.Account)),
+	("Contrat__r": item.Contrat__r) if(!isEmpty(item.Contrat__r)),
+	"NumeroDuDocument__c": item.NumeroDuDocument__c,
+	"DomainedActivite__c": item.DomainedActivite__c,
+	"RecordtypeId" : item.RecordtypeId,
+	"MontantEncaissement__c ": item.MontantEncaissement__c,
+	"Origin": item.Origin,
+	"Reason": item.Reason,
+	"SousMotif__c": item.SousMotif__c,
+	"TypologieDeDocument__c": item.TypologieDeDocument__c,
+	"ReferenceEncaissement__c": item.ReferenceEncaissement__c
+	//"Status" : item.status
+} ]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[attributes.queryParams.objectSfdc == "Account" and attributes.queryParams.typeData == "Marketing"]' >
+				<ee:transform doc:name="Account Marketing mapping to Java" doc:id="d6a6c0b6-76de-4845-a9b7-c2a687d6be67" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map (item, index) -> {
+	//"LastName": "testLN1",
+	//"FirstName": "testFN",
+	//"PersonEmail": "testMarleine@test.com",
+	//"Salutation": "Mr.",
+	"RecordTypeId": item.RecordTypeId,
+	("NAdherent__c" : item.NAdherent__c) if(!isEmpty(item.NAdherent__c)),
+	("Cible__c" : item.Cible__c) if(!isEmpty(item.Cible__c)),
+	//("DateDeSortie__c" : item.DateDeSortie__c as Date as Date {format: "yyyy-MM-dd"}) if(!isEmpty(item.DateDeSortie__c)),
+	("DateDEntree__c" : item.DateDEntree__c as Date as Date {format: "yyyy-MM-dd"}) if(!isEmpty(item.DateDEntree__c)),
+	("Anciennete__c" : item.Anciennete__c) if(!isEmpty(item.Anciennete__c)),
+	("NPSNumerique__c" : item.NPSNumerique__c) if(!isEmpty(item.Cible__c)),
+	("NPSProfil__c" : item.NPSProfil__c) if(!isEmpty(item.NPSProfil__c)),
+	("SegmentMarketing__c" : item.SegmentMarketing__c) if(!isEmpty(item.SegmentMarketing__c)),
+	("StatutDuCompteClient__c" : item.StatutDuCompteClient__c) if(!isEmpty(item.StatutDuCompteClient__c)),
+	("MultiEquipement__c" : item.MultiEquipement__c) if(!isEmpty(item.MultiEquipement__c)),
+	("NombreDeContrats__c" : item.NombreDeContrats__c) if(!isEmpty(item.NombreDeContrats__c)),
+	("CSPRequalifiee__c" : item.CSPRequalifiee__c) if(!isEmpty(item.CSPRequalifiee__c)),
+	("VersementProgrammeDe2Mois__c" : item.VersementProgrammeDe2Mois__c) if(!isEmpty(item.VersementProgrammeDe2Mois__c))
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="0cefc14a-7fb0-450e-a4be-747ac28094af" />
+			</otherwise>
+		</choice>
+<!-- 		<salesforce:upsert objectType="#[attributes.queryParams.objectSfdc]" externalIdFieldName="#[attributes.queryParams.externalIdField]" doc:name="Upsert" doc:id="5ccf7e12-6761-4e0b-b337-0dba69abe217" config-ref="Salesforce_Config" /> -->
+		<salesforce:upsert objectType="#[attributes.queryParams.objectSfdc]" externalIdFieldName="#[attributes.queryParams.externalIdField]" doc:name="Upsert" doc:id="75ba1325-9fe6-4e3b-a600-7fe55e327cf8" config-ref="Salesforce_Config"/>
+		<ee:transform doc:name="To Json" doc:id="6e520678-4ed6-4ec2-8efd-00d89e97e5d2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.items map (item,index) -> {
+    "id" : item.id,
+    "message" : item.message,
+    "success" : item.successful
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Set Log Configuration" doc:id="88994840-4272-45f8-bf1d-16d9d7607d03" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="logMessage" ><![CDATA[%dw 2.0
+output application/java
+---
+'System sfdc - Upsert accounts - Finish']]></ee:set-variable>
+				<ee:set-variable variableName="logCategory" ><![CDATA[%dw 2.0
+output application/java
+---
+'Trace']]></ee:set-variable>
+				<ee:set-variable variableName="logLevel" ><![CDATA[%dw 2.0
+output application/java
+---
+'INFO']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mule-common-logger-subflow" doc:id="5db2432d-c92a-456e-a8b1-3c2d61555c74" name="mule-common-logger-subflow" />
+	</flow>
+	<flow name="get:\getRecord:s-gr-sfdc-config" doc:id="d7dee76f-7321-459f-8bd2-dceb55458f21" >
+		<ee:transform doc:name="Set Log Configuration" doc:id="0a7ea02f-08bd-4e16-9bb4-c10287bfbf92" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="logMessage" ><![CDATA[%dw 2.0
+output application/java
+---
+'System sfdc - Get single record - Start']]></ee:set-variable>
+				<ee:set-variable variableName="logCategory" ><![CDATA[%dw 2.0
+output application/java
+---
+'Trace']]></ee:set-variable>
+				<ee:set-variable variableName="logLevel" ><![CDATA[%dw 2.0
+output application/java
+---
+'INFO']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mule-common-logger-subflow" doc:id="795354ff-8cdf-4e00-a2e5-57a6cdc8362b" name="mule-common-logger-subflow" />
+		<set-variable value="#[attributes.queryParams.queryString]" doc:name="Query String" doc:id="e466d099-37df-48f8-a0d7-ef09f39c2296" variableName="queryString" />
+		<salesforce:query doc:name="Query" doc:id="6efc8883-b738-46d4-90b5-9b74bf9283a0" config-ref="Salesforce_Config" >
+			<salesforce:salesforce-query ><![CDATA[#[vars.queryString]]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="To Json" doc:id="9c190732-42f9-4bb1-957c-902ab7f8ff02" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Set Log Configuration" doc:id="ef3e50c9-6545-4f5a-9a40-105826a2c573" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="logMessage" ><![CDATA[%dw 2.0
+output application/java
+---
+'System sfdc - Get single record - Finish']]></ee:set-variable>
+				<ee:set-variable variableName="logCategory" ><![CDATA[%dw 2.0
+output application/java
+---
+'Trace']]></ee:set-variable>
+				<ee:set-variable variableName="logLevel" ><![CDATA[%dw 2.0
+output application/java
+---
+'INFO']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="mule-common-logger-subflow" doc:id="47f05ce5-212c-4425-9da0-8f8885f11364" name="mule-common-logger-subflow" />
+	</flow>
+</mule>

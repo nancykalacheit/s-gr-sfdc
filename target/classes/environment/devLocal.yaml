@@ -1,0 +1,38 @@
+# Environment specific properties
+environment:
+ name: "dev"
+  
+api:
+  name: "${application.name}-${environment.name}"
+  //id: "329996"
+  version: "v1"
+
+http:
+  port: "8083"
+  timeout: "999999999"
+  listener:
+    path: "/api/${api.name}/${api.version}/*"
+
+https:
+  listener:
+    path: "/api/${api.name}/${api.version}/*"
+
+config:
+  salesforce:
+    authorizationURL: "https://test.salesforce.com/services/Soap/u/50.0"
+    username: "mulesoft.api@garance.fr.lot1real"
+    password: "${secure::passwords.sfdcPass}"
+    securityToken: "tKO7vwAyJhyB2QRzU4VOmaQKy"
+    timeout: "900000000"
+    
+# Common properties
+common:
+  audit:
+    role:
+      logStart: "true"
+      logEnd: "true"
+      logInfo: "true"
+      logWarning: "true"
+      logError: "true"
+      logDebug: "true"
+    defaultLogPayloadLogic: "ALWAYS"
