@@ -1,0 +1,47 @@
+{
+  "configs": [
+    "global.xml",
+    "s-gr-sfdc-impl.xml",
+    "s-gr-sfdc-main.xml"
+  ],
+  "secureProperties": [],
+  "redeploymentEnabled": true,
+  "name": "com.garance:s-gr-sfdc:1.0.0-SNAPSHOT",
+  "minMuleVersion": "4.3.0",
+  "requiredProduct": "MULE_EE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedPackages": [],
+      "exportedResources": [
+        "api/data-types/crm/Account-data-type.raml",
+        "api/examples/crm/Account/Bulk-Accounts.raml",
+        "api/examples/crm/Account/New-Account.raml",
+        "api/examples/crm/Account/Single-Account.raml",
+        "api/exchange_modules/4ee67a21-421f-4c2f-ad1d-5abd11c095a9/api-status-resource-type/1.0.0/api-status-resource-typeraml.raml",
+        "api/exchange_modules/4ee67a21-421f-4c2f-ad1d-5abd11c095a9/client-id-enforcement/1.0.0/client-id-enforcement.raml",
+        "api/exchange_modules/4ee67a21-421f-4c2f-ad1d-5abd11c095a9/read-only-resource-type/1.0.0/read-only-resource-type.raml",
+        "api/exchange_modules/4ee67a21-421f-4c2f-ad1d-5abd11c095a9/read-write-resource-type/1.0.0/read-write-resource-type.raml",
+        "api/library/resource-types.raml",
+        "api/s-gr-sfdc.raml",
+        "environment/default-prop.yaml",
+        "environment/dev.yaml",
+        "environment/devLocal.yaml",
+        "environment/prod.yaml",
+        "environment/test.yaml",
+        "environment/uat.yaml",
+        "global.xml",
+        "log4j2.xml",
+        "s-gr-sfdc-impl.xml",
+        "s-gr-sfdc-main.xml",
+        "secure/dev-secure.yaml",
+        "secure/prep-secure.yaml",
+        "secure/prod-secure.yaml"
+      ]
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}
